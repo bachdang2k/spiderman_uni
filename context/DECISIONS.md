@@ -1,0 +1,21 @@
+# DECISIONS
+
+| Ngày       | Quyết định                                                              | Giả định                                                                                                           | Đảo ngược được |
+| ---------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------------- |
+| 2026-09-04 | Dùng VIPER Creative Dogfood thay toàn bộ workflow enterprise            | Sản phẩm là frontend one-shot, không có DB/deploy boundary                                                         | Có             |
+| 2026-09-04 | Nâng `viper-user-picky` thành Design & UI/UX Director                   | Token compliance một mình không bắt được nhịp kể và affordance                                                     | Có             |
+| 2026-09-04 | Playwright MCP chạy một session cho vai duy nhất                        | Không còn nhiều persona nên không có browser state collision                                                       | Có             |
+| 2026-09-04 | Dogfood chỉ dùng một vai `viper-user-picky`                             | Project không có DB/auth; một reviewer UI/UX chạy nhiều pass cho tín hiệu tốt hơn sáu vai chồng lặp                | Có             |
+| 2026-09-04 | Loại edge/state stress khỏi dogfood                                     | Authority muốn vòng cải tiến này tập trung thuần design/UI/UX/motion                                               | Có             |
+| 2026-09-04 | Dùng Playwright MCP local tại `127.0.0.1:8935/sse`                      | Authority đã mở server; không tự khởi động thêm MCP                                                                | Có             |
+| 2026-09-04 | Chuyển payoff từ lời tỏ tình sang một món quà vui ở giai đoạn tìm hiểu  | Trải nghiệm cần thể hiện sự để tâm và hài hước, không gán nhãn tình cảm hay định mệnh quá sớm                      | Có             |
+| 2026-09-04 | Tăng Spider-language bằng lens HUD, motion streak và THWIP có kiểm soát | Motif hiện tại thiên về tơ; thêm dấu hiệu thị giác giúp cảm hứng Spider-Man rõ hơn mà không dùng logo/IP trực tiếp | Có             |
+| 2026-09-04 | Thay arc hoa–báo–thư bằng cosmic 6→L→mưa→anh đào→bướm→lời mời           | Authority muốn một hành trình tò mò và vui, payoff là lời rủ đi ngắm hoàng hôn chứ không phải tỏ tình              | Có             |
+| 2026-09-04 | Giới hạn Three.js ở galaxy 6→L và hero sakura→`LINH CHU`                | Hai đoạn này cần particle depth/morph dày; các cảnh còn lại tiếp tục dùng SVG/Canvas nhẹ hơn trên mobile           | Có             |
+| 2026-09-04 | Wonder woman là heroine nguyên bản, không sao chép nhân vật DC          | Giữ được ẩn dụ “cô gái tuyệt vời” và nhịp comic mà không biến sản phẩm thành fan art trực tiếp                     | Có             |
+| 2026-09-04 | Cánh hoa trực tiếp ghép thành `LINH CHU`; đàn bướm chỉ bay quanh chữ    | Tên là payoff thị giác chính; bỏ copy và một biểu tượng bướm trung tâm giúp cảnh ít chữ, rõ ý và đáng nhớ hơn      | Có             |
+| 2026-09-04 | Dùng particle instancing cho hero sakura thay vì port DOM từ Sakura.js  | Cần mật độ lớn, chiều sâu và morph target ổn định; DOM petal phù hợp lớp ambience hơn là choreography trung tâm    | Có             |
+| 2026-09-04 | Rebuild galaxy bằng shader 11.500 game-star point thay cho nét particle | Reference cần sao cực nhỏ, twinkle độc lập, lõi cloud đặc và stream đứt đoạn; nét đều làm hình đọc như DNA         | Có             |
+| 2026-09-04 | Tạm gỡ toàn bộ Spider character/icon tự tạo khỏi runtime                | Authority sẽ cung cấp visual mới; giữ icon sai hướng làm nhiễu quá trình duyệt galaxy                              | Có             |
+| 2026-09-04 | Morph 6→L theo ordered sand-flow, outer arm rời trước và core rời sau   | Nội suy thẳng đọc như vector morph; stagger theo vị trí + cung gió tạo cảm giác cát bay mà vẫn có trật tự          | Có             |
+| 2026-09-04 | Dùng PNG reference làm spatial/color mask cho point cloud số `6`        | Lấy silhouette đúng chiều và đúng nhịp xoắn của ảnh, trong khi đầu ra vẫn là hạt sao WebGL có twinkle và morph     | Có             |

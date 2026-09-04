@@ -1,0 +1,7 @@
+# Reload/trust this workspace after adding the file so Codex exposes browser_* tools.
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 3
+
+[mcp_servers.browser]
+url = "http://127.0.0.1:8935/sse"
