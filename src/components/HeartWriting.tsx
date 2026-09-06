@@ -4,7 +4,7 @@ import { composeScript, CAP_HEIGHT, type Script } from '../assets/lettering/line
 import { createLetterPoint, galaxyStageHeight, LETTER_HEIGHT } from '../lib/galaxyLetter'
 import { random } from '../lib/noise'
 import { heartPoint, HEART_EXTENT } from '../lib/heart/geometry'
-import { rampColor, rampEmission, TOKEN } from '../lib/heart/palette'
+import { HANDOVER_SKY, rampColor, rampEmission, TOKEN } from '../lib/heart/palette'
 import { sampleScript } from '../lib/heart/script'
 import { reducedMotion } from '../lib/motion'
 import {
@@ -395,7 +395,11 @@ export function HeartWriting(props: Props) {
           Math.round(height * pixelRatio),
           { type: THREE.HalfFloatType, depthBuffer: true },
         )
-        const fadeUniforms = { uFade: { value: 1 } }
+        const handoverSky = new THREE.Color(...HANDOVER_SKY).convertSRGBToLinear()
+        const fadeUniforms = {
+          uFade: { value: 1 },
+          uSky: { value: handoverSky.clone() },
+        }
         const fadeScene = new THREE.Scene()
         const fadeCamera = new THREE.Camera()
         const fadeMaterial = new THREE.ShaderMaterial({
@@ -441,6 +445,7 @@ export function HeartWriting(props: Props) {
           streak: 0,
           fade: 1,
           yaw: 0,
+          sky: 0,
         }
         const timeline = gsap.timeline({ paused: true })
         if (reduce) {
@@ -460,6 +465,13 @@ export function HeartWriting(props: Props) {
               PHASE.preroll,
             )
             .to(clocks, { fade: 0.62, duration: 0.6 }, PHASE.preroll)
+            // The galaxy's sky drains away while the heart draws itself together, so the
+            // background reaches true black before anything is written on it.
+            .to(
+              clocks,
+              { sky: 1, duration: PHASE.condense + PHASE.hold, ease: 'power1.inOut' },
+              PHASE.preroll,
+            )
             .to(clocks, { streak: 0.02, duration: 0.6 }, PHASE.preroll)
         }
         const dissolveAt = PHASE.preroll + PHASE.condense + PHASE.hold
@@ -548,6 +560,7 @@ export function HeartWriting(props: Props) {
             clocks.yaw
 
           fadeUniforms.uFade.value = clocks.fade
+          fadeUniforms.uSky.value.copy(handoverSky).multiplyScalar(1 - clocks.sky)
           renderer.setRenderTarget(accumulation)
           renderer.render(fadeScene, fadeCamera)
           renderer.clearDepth()

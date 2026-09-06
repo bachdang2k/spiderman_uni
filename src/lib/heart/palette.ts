@@ -18,6 +18,23 @@ export const TOKEN = {
   gold: hex('#D4A84F'),
 }
 
+/**
+ * Two of the galaxy's own star colours, carried over so the ending reads as the same sky the
+ * six was made of. Without them the ramp ran straight from a desaturated blue-grey to cream and
+ * the whole sequence read black-and-white beside the scene it grows out of.
+ */
+export const GALAXY_STAR = {
+  blue: hex('#B9D9FF'),
+  pale: hex('#DCECFF'),
+}
+
+/**
+ * The galaxy's own background where the letter sat: its dark gradient with the nebula glow on
+ * top. The ending opens on this and settles to `night`, so the cut between the two scenes has
+ * no step in the background.
+ */
+export const HANDOVER_SKY: Rgb = [8 / 255, 17 / 255, 32 / 255]
+
 const mix = (a: Rgb, b: Rgb, t: number): Rgb => [
   a[0] + (b[0] - a[0]) * t,
   a[1] + (b[1] - a[1]) * t,
@@ -33,7 +50,9 @@ const BODY = mix(TOKEN.deepBlue, TOKEN.cream, 0.45)
 const RAMP: { at: number; color: Rgb }[] = [
   { at: 0.0, color: TOKEN.deepBlue },
   { at: 0.45, color: BODY },
-  { at: 0.8, color: TOKEN.cream },
+  { at: 0.8, color: GALAXY_STAR.blue },
+  { at: 0.94, color: GALAXY_STAR.pale },
+  // Only the hottest cores still clip to white, the way the galaxy's brightest stars do.
   { at: 1.0, color: TOKEN.cream },
 ]
 

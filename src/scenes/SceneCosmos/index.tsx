@@ -3,7 +3,12 @@ import { SceneContainer } from '../../components/SceneContainer'
 import { SceneProgress } from '../../components/SceneProgress'
 import { InteractiveHint } from '../../components/InteractiveHint'
 import { StarField } from '../../components/StarField'
-import { GalaxyMorph, MORPH_SECONDS } from '../../components/GalaxyMorph'
+import {
+  GalaxyMorph,
+  DEPART_SECONDS,
+  GAP_SECONDS,
+  MORPH_SECONDS,
+} from '../../components/GalaxyMorph'
 import { STORY_CONFIG } from '../../config/story'
 import { useSceneReveal } from '../../hooks/useSceneReveal'
 import { reducedMotion } from '../../lib/motion'
@@ -28,7 +33,7 @@ export function SceneCosmos(props: SceneProps) {
     // on into the ending by itself, so the six and everything after it is one continuous take.
     settleTimer.current = setTimeout(
       props.onComplete,
-      reducedMotion() ? 10 : (MORPH_SECONDS + 0.9) * 1000,
+      reducedMotion() ? 10 : (MORPH_SECONDS + DEPART_SECONDS + GAP_SECONDS) * 1000,
     )
   }
   return (

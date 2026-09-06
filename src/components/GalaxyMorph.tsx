@@ -6,6 +6,10 @@ import { createLetterPoint } from '../lib/galaxyLetter'
 
 /** The six is slow on purpose: it is the last thing the viewer touches before the ending runs. */
 export const MORPH_SECONDS = 6.4
+/** The letter leaves before the ending picks it up, so the two L's are not one continuous object. */
+export const DEPART_SECONDS = 0.8
+/** How long the sky is held empty. The ending's L then arrives as a cut, not as a continuation. */
+export const GAP_SECONDS = 0.7
 import galaxyReferenceUrl from '../assets/references/galaxy-six-mask.png'
 
 type GalaxyPoint = {
@@ -56,12 +60,13 @@ const VERTEX_SHADER = `
 const FRAGMENT_SHADER = `
   varying vec3 vColor;
   varying float vTwinkle;
+  uniform float uDepart;
 
   void main() {
     float distanceToCenter = length(gl_PointCoord - vec2(0.5));
     float core = 1.0 - smoothstep(0.03, 0.19, distanceToCenter);
     float halo = 1.0 - smoothstep(0.09, 0.5, distanceToCenter);
-    float alpha = (core + halo * 0.52) * (0.76 + vTwinkle * 0.24);
+    float alpha = (core + halo * 0.52) * (0.76 + vTwinkle * 0.24) * (1.0 - uDepart);
     if (alpha < 0.015) discard;
     gl_FragColor = vec4(vColor * (1.0 + vTwinkle * 0.34), alpha);
   }
@@ -205,6 +210,7 @@ function createRadialTexture(THREE: typeof import('three'), cross = false) {
 export function GalaxyMorph({ morphed }: { morphed: boolean }) {
   const mountRef = useRef<HTMLDivElement>(null)
   const progressRef = useRef({ value: 0 })
+  const departRef = useRef({ value: 0 })
 
   useEffect(() => {
     let cancelled = false
@@ -285,6 +291,7 @@ export function GalaxyMorph({ morphed }: { morphed: boolean }) {
             uMorph: { value: progressRef.current.value },
             uTime: { value: 0 },
             uPixelRatio: { value: pixelRatio },
+            uDepart: { value: departRef.current.value },
           },
           vertexShader: VERTEX_SHADER,
           fragmentShader: FRAGMENT_SHADER,
@@ -340,12 +347,14 @@ export function GalaxyMorph({ morphed }: { morphed: boolean }) {
         const draw = (time: number) => {
           const seconds = time * 0.001
           const morph = progressRef.current.value
+          const depart = departRef.current.value
           material.uniforms.uMorph.value = morph
           material.uniforms.uTime.value = seconds
+          material.uniforms.uDepart.value = depart
           stars.rotation.z = Math.sin(seconds * 0.12) * 0.012 * (1 - morph)
           stars.rotation.y += (pointer.x - stars.rotation.y) * 0.025
           stars.rotation.x += (-pointer.y - stars.rotation.x) * 0.025
-          core.material.opacity = 0.22 * (1 - morph)
+          core.material.opacity = 0.22 * (1 - morph) * (1 - depart)
           flares.forEach(({ flare, material: flareMaterial, point, phase }, index) => {
             const target = createLetterPoint(Math.floor((index / flares.length) * count), count)
             const eased = morph * morph * (3 - 2 * morph)
@@ -353,7 +362,7 @@ export function GalaxyMorph({ morphed }: { morphed: boolean }) {
             flare.position.y = point.y + (target.y - point.y) * eased
             flare.position.z = point.z + (target.z - point.z) * eased
             flareMaterial.opacity =
-              (0.48 + Math.sin(seconds * 0.7 + phase) * 0.1) * (1 - morph * 0.28)
+              (0.48 + Math.sin(seconds * 0.7 + phase) * 0.1) * (1 - morph * 0.28) * (1 - depart)
           })
           renderer.render(scene, camera)
           frame = requestAnimationFrame(draw)
@@ -392,13 +401,23 @@ export function GalaxyMorph({ morphed }: { morphed: boolean }) {
   }, [])
 
   useEffect(() => {
-    const tween = gsap.to(progressRef.current, {
+    const reduce = reducedMotion()
+    const morph = gsap.to(progressRef.current, {
       value: morphed ? 1 : 0,
-      duration: reducedMotion() ? 0.01 : MORPH_SECONDS,
+      duration: reduce ? 0.01 : MORPH_SECONDS,
       ease: 'power2.inOut',
     })
+    // Once the letter has settled it leaves the sky, so the ending's L arrives on an empty
+    // frame instead of appearing to be the same object carried across the scene change.
+    const depart = gsap.to(departRef.current, {
+      value: morphed ? 1 : 0,
+      duration: reduce ? 0.01 : DEPART_SECONDS,
+      delay: morphed && !reduce ? MORPH_SECONDS : 0,
+      ease: 'power2.in',
+    })
     return () => {
-      tween.kill()
+      morph.kill()
+      depart.kill()
     }
   }, [morphed])
 

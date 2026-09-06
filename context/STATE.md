@@ -54,7 +54,7 @@ yêu cầu cảnh cuối viết `Diệu Linh`. Đã thêm `STORY_CONFIG.signatur
 
 ## Mốc thời gian của cảnh 4 (giây)
 
-`0 preroll(2.4) → condense(2.2) → hold(1.8) → dissolve(4.4) → current(1.5) → viết tên(5.0) →
+`0 preroll(1.2) → condense(2.2) → hold(1.8) → dissolve(4.4) → current(1.5) → viết tên(5.0) →
 tên giữ(2.8) → gom(1.3) → viết câu hỏi(6.6) → giữ vô thời hạn` — tổng 26.8s.
 
 Tua đúng beat: `window.heartSequence.seek(giây)` (đã dùng trong `tests/design-dogfood.spec.ts`).
@@ -134,6 +134,12 @@ ending, uncropped` — đã dựng lại đúng hình cũ để xác nhận test
 - Chữ `w` thường nới rộng 17.1 → 21.0 với đáy nhọn, hết đọc nhầm thành `m`.
 - Nền hết ngả navy lúc `t7.3–9.5`: trail fade nâng 0.34 → 0.52 sau khi tim vỡ.
 - Ngân sách hạt desktop 110.000 → 55.000 với máy `≤ 4` nhân.
+- **Màn chuyển hai chữ `L` có khoảng trống** (Authority yêu cầu): morph xong → chữ `L` tắt dần
+  `0.8s` → bầu trời trống `0.7s` (còn nền và sao) → sang cảnh cuối, chữ `L` xuất hiện đột ngột.
+  Chuyển cảnh dời từ `6.4 + 0.9` sang `6.4 + 0.8 + 0.7 = 7.9s`, đo lại đúng `7.923ms`.
+- **Hết xung đột màu galaxy ↔ cảnh cuối**: dải màu hạt lấy `#B9D9FF` và `#DCECFF` từ `STAR_COLORS`
+  của galaxy; nền cảnh cuối mở bằng đúng tông trời galaxy `#081120` rồi lắng về đen trước khi
+  tan rã. Bằng chứng: `docs/evidence/handover-*.png` và `cut-before.png` / `cut-after.png`.
 
 ## Phiên sau làm gì
 

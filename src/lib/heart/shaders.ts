@@ -207,8 +207,11 @@ export const HEART_FRAGMENT_SHADER = `
 
 export const FADE_FRAGMENT_SHADER = `
   uniform float uFade;
+  uniform vec3 uSky;
   void main() {
-    gl_FragColor = vec4(0.0, 0.0, 0.0, uFade);
+    // What an empty frame decays towards. It starts as the sky the galaxy handed over and
+    // reaches true black by the time the heart is whole.
+    gl_FragColor = vec4(uSky, uFade);
   }
 `
 
