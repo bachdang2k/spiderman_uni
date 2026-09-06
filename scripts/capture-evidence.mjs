@@ -86,8 +86,9 @@ async function shoot(browser, { tag, width, height, deny, beats, stopAtCosmos })
     renderer: document.querySelector('.heart-writing').dataset.renderer ?? 'svg-fallback',
     particles: document.querySelector('.heart-writing').dataset.particles ?? null,
   }))
-  for (const [name, at] of beats) {
-    await page.evaluate((t) => window.heartSequence?.seek(t), at)
+  const marks = await page.evaluate(() => window.heartSequence?.beats() ?? null)
+  for (const name of beats) {
+    if (marks) await page.evaluate((t) => window.heartSequence.seek(t), marks[name] ?? 0)
     await page.waitForTimeout(450)
     await page.screenshot({ path: `${OUT}/${tag}-${name}.png` })
   }
@@ -103,27 +104,23 @@ try {
     tag: '1280',
     width: 1280,
     height: 800,
-    beats: [
-      ['mid-dissolve', 8.5],
-      ['name-alone', 18.6],
-      ['both-lines', 26.5],
-    ],
+    beats: ['dissolve', 'nameAlone', 'bothLines'],
   })
-  await shoot(browser, { tag: '390', width: 390, height: 844, beats: [['both-lines', 26.5]] })
-  await shoot(browser, { tag: '360', width: 360, height: 640, beats: [['both-lines', 26.5]] })
+  await shoot(browser, { tag: '390', width: 390, height: 844, beats: ['bothLines'] })
+  await shoot(browser, { tag: '360', width: 360, height: 640, beats: ['bothLines'] })
   await shoot(browser, {
     tag: '1280-webgl-fallback',
     width: 1280,
     height: 800,
     deny: 'webgl',
-    beats: [['frame', 0]],
+    beats: ['frame'],
   })
   await shoot(browser, {
     tag: '1280-halffloat-fallback',
     width: 1280,
     height: 800,
     deny: 'halfFloat',
-    beats: [['frame', 0]],
+    beats: ['frame'],
   })
 } finally {
   await browser.close()

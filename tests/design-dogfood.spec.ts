@@ -70,12 +70,8 @@ test('design dogfood — the six, the heart, the name and the question', async (
   const particles = Number(await page.locator('.heart-writing').getAttribute('data-particles'))
   expect(particles).toBeGreaterThanOrEqual(30_000)
 
-  const beats: Record<string, number> = {
-    '05-heart-hold': 4.8,
-    '06-mid-dissolve': 7.8,
-    '07-name-alone': 18.6,
-    '08-both-lines': 26.8,
-  }
+  // Named by the sequence itself, so retiming a phase moves the captures with it.
+  const beats = await page.evaluate(() => window.heartSequence.beats())
   for (const [name, at] of Object.entries(beats)) {
     await page.evaluate((seconds) => window.heartSequence.seek(seconds), at)
     await capture(page, `${testInfo.project.name}-${name}`)

@@ -26,6 +26,20 @@ export const TOKEN = {
 export const GALAXY_STAR = {
   blue: hex('#B9D9FF'),
   pale: hex('#DCECFF'),
+  warm: hex('#F2C889'),
+}
+
+/**
+ * Colour for one particle of ink. Every stroke used to be flat cream, which the bloom clipped
+ * to white and left the writing reading black-and-white beside the galaxy it grows out of.
+ * Drawing per particle from the galaxy's own star colours gives the lines the same blue-white
+ * body with the occasional warm spark, and keeps the hottest cores clipping to cream.
+ */
+export function inkColor(temperature: number): Rgb {
+  if (temperature < 0.08) return GALAXY_STAR.warm
+  if (temperature < 0.38) return TOKEN.cream
+  if (temperature < 0.72) return GALAXY_STAR.pale
+  return GALAXY_STAR.blue
 }
 
 /**

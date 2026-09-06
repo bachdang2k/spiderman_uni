@@ -32,7 +32,10 @@ Hai file này đang đóng băng và **chưa được đụng tới** — đây 
 | `context/CURRENT-SCRIPT.md` | Vẫn mô tả arc anh đào và vẫn mang dấu `FROZEN FOR REVIEW`. Cần viết lại còn năm cảnh, lời mời sống tiếp thành beat C                                                           |
 | `context/PRD.md`            | `AC-1` phải đổi thành **năm** cảnh · `AC-4` (cánh hoa ghép `LINH CHU`) phải thay bằng tên viết bằng hạt · `AC-5` phải sửa lời: lời mời còn, nút trả lời và hoàng hôn thì không |
 
-Ngoài ra có **một mâu thuẫn dữ liệu** cần Authority quyết:
+~~Mâu thuẫn `girlName`~~ — **đã được Authority trả lời**: tên đầy đủ là **Chu Thị Diệu Linh**,
+nên `girlName = 'Linh Chu'` và tên viết ở cảnh cuối `Diệu Linh` không hề mâu thuẫn. Không phải sửa gì.
+
+Bối cảnh cũ:
 `STORY_CONFIG.girlName` và `title` vẫn là `Linh Chu`, nhưng direction (`§1`, `§7.5`, `§12.10`)
 yêu cầu cảnh cuối viết `Diệu Linh`. Đã thêm `STORY_CONFIG.signatureName = 'Diệu Linh'` và viết
 đúng theo direction; **không** tự đổi `girlName` hay tiêu đề vì nằm ngoài `§13`.
@@ -54,10 +57,11 @@ yêu cầu cảnh cuối viết `Diệu Linh`. Đã thêm `STORY_CONFIG.signatur
 
 ## Mốc thời gian của cảnh 4 (giây)
 
-`0 preroll(1.2) → condense(2.2) → hold(1.8) → dissolve(4.4) → current(1.5) → viết tên(5.0) →
-tên giữ(2.8) → gom(1.3) → viết câu hỏi(6.6) → giữ vô thời hạn` — tổng 26.8s.
+`0 preroll(1.2) → condense(2.2) → hold(5.4) → dissolve(4.4) → current(1.5) → viết tên(6.5) →
+tên giữ(2.0) → viết câu hỏi(8.6) → giữ vô thời hạn` — tổng 31.8s. Hạt dự trữ gom trong lúc viết
+tên chứ không thành một nhịp riêng.
 
-Tua đúng beat: `window.heartSequence.seek(giây)` (đã dùng trong `tests/design-dogfood.spec.ts`).
+Tua đúng beat: `window.heartSequence.seek(giây)`; mốc có tên ở `window.heartSequence.beats()` (đã dùng trong `tests/design-dogfood.spec.ts`).
 
 ## Challenge log
 

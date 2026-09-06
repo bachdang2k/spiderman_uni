@@ -4,7 +4,7 @@ import { composeScript, CAP_HEIGHT, type Script } from '../assets/lettering/line
 import { createLetterPoint, galaxyStageHeight, LETTER_HEIGHT } from '../lib/galaxyLetter'
 import { random } from '../lib/noise'
 import { heartPoint, HEART_EXTENT } from '../lib/heart/geometry'
-import { HANDOVER_SKY, rampColor, rampEmission, TOKEN } from '../lib/heart/palette'
+import { HANDOVER_SKY, inkColor, rampColor, rampEmission, TOKEN } from '../lib/heart/palette'
 import { sampleScript } from '../lib/heart/script'
 import { reducedMotion } from '../lib/motion'
 import {
@@ -38,13 +38,12 @@ const RESERVE_SHARE = 0.35
 const PHASE = {
   preroll: 1.2,
   condense: 2.2,
-  hold: 1.8,
+  hold: 5.4,
   dissolve: 4.4,
   current: 1.5,
-  writeName: 5.0,
-  nameHolds: 2.8,
-  gather: 1.3,
-  writeQuestion: 6.6,
+  writeName: 6.5,
+  nameHolds: 2.0,
+  writeQuestion: 8.6,
 }
 
 type Layout = {
@@ -101,7 +100,10 @@ function buildLayout(props: Props, width: number, height: number): Layout {
   const gap = CAP_HEIGHT * nameScale * 1.05
   const questionHalf = (questionScript.bounds.height * questionFit) / 2
   const blockHalf = nameHalf + gap / 2 + questionHalf
-  const blockCenterY = visibleHeight * (mobile ? 0.02 : -0.04)
+  // Lifted off the lower edge: sitting lower, the question's last line read as hanging off the
+  // frame rather than resting in it. A portrait frame is more than twice as tall in world units
+  // as a landscape one, so the same fraction would throw the two compositions apart.
+  const blockCenterY = visibleHeight * (mobile ? 0.015 : 0.02)
   const nameCenterY = blockCenterY + blockHalf - nameHalf
   const questionCenterY = blockCenterY - blockHalf + questionHalf
 
@@ -220,7 +222,7 @@ export function HeartWriting(props: Props) {
         renderer.toneMapping = THREE.ACESFilmicToneMapping
         renderer.toneMappingExposure = 0.92
         renderer.outputColorSpace = THREE.SRGBColorSpace
-        renderer.setClearColor(new THREE.Color(...TOKEN.night).convertSRGBToLinear(), 1)
+        renderer.setClearColor(new THREE.Color(...HANDOVER_SKY).convertSRGBToLinear(), 1)
         renderer.autoClear = false
         mount.appendChild(renderer.domElement)
 
@@ -317,13 +319,19 @@ export function HeartWriting(props: Props) {
           // ink, so the heart keeps its layered depth while the writing reads evenly luminous.
           // The name is the payoff and the question is the coda, so the question is written in
           // the same hand at a lower emission as well as a smaller cap height.
+          // Above the bloom threshold the tone map washes every hue to white, so only the
+          // cream and warm particles are written hot enough to burn. The blue-bodied majority
+          // is written cooler, which is what lets the finished lines read as coloured light
+          // rather than as white on black.
+          const temperature = random(index * 53.7)
+          const inkHeat = temperature < 0.38 ? 1 : 0.5
           inks[index] =
             roles[index] < 0.5
-              ? 1.3 + random(index * 37.1) * 0.85
+              ? (1.3 + random(index * 37.1) * 0.85) * inkHeat
               : roles[index] < 1.5
-                ? 0.92 + random(index * 41.3) * 0.55
+                ? (0.92 + random(index * 41.3) * 0.55) * inkHeat
                 : emits[index]
-          const inkRgb = flare ? TOKEN.gold : TOKEN.cream
+          const inkRgb = flare ? TOKEN.gold : inkColor(temperature)
           color.setRGB(inkRgb[0], inkRgb[1], inkRgb[2], THREE.SRGBColorSpace)
           inkColors.set([color.r, color.g, color.b], offset)
           sizes[index] =
@@ -395,10 +403,10 @@ export function HeartWriting(props: Props) {
           Math.round(height * pixelRatio),
           { type: THREE.HalfFloatType, depthBuffer: true },
         )
-        const handoverSky = new THREE.Color(...HANDOVER_SKY).convertSRGBToLinear()
+        // The quad paints the galaxy's sky itself, in pixels, so it needs the frame size.
         const fadeUniforms = {
           uFade: { value: 1 },
-          uSky: { value: handoverSky.clone() },
+          uResolution: { value: new THREE.Vector2(width, height) },
         }
         const fadeScene = new THREE.Scene()
         const fadeCamera = new THREE.Camera()
@@ -445,7 +453,6 @@ export function HeartWriting(props: Props) {
           streak: 0,
           fade: 1,
           yaw: 0,
-          sky: 0,
         }
         const timeline = gsap.timeline({ paused: true })
         if (reduce) {
@@ -465,20 +472,17 @@ export function HeartWriting(props: Props) {
               PHASE.preroll,
             )
             .to(clocks, { fade: 0.62, duration: 0.6 }, PHASE.preroll)
-            // The galaxy's sky drains away while the heart draws itself together, so the
-            // background reaches true black before anything is written on it.
-            .to(
-              clocks,
-              { sky: 1, duration: PHASE.condense + PHASE.hold, ease: 'power1.inOut' },
-              PHASE.preroll,
-            )
             .to(clocks, { streak: 0.02, duration: 0.6 }, PHASE.preroll)
         }
         const dissolveAt = PHASE.preroll + PHASE.condense + PHASE.hold
         const currentAt = dissolveAt + PHASE.dissolve
         const nameAt = currentAt + PHASE.current
-        const gatherAt = nameAt + PHASE.writeName + PHASE.nameHolds
-        const questionAt = gatherAt + PHASE.gather
+        // The reserve pools while the name is still being written, so the pause after it is a
+        // held frame rather than a beat of visible converging. Nothing is readable in the band;
+        // it only stops the question arriving from nowhere.
+        const gatherAt = nameAt + PHASE.writeName * 0.3
+        const gatherFor = PHASE.writeName * 0.6
+        const questionAt = nameAt + PHASE.writeName + PHASE.nameHolds
         const endAt = questionAt + PHASE.writeQuestion
 
         if (!reduce) {
@@ -511,8 +515,8 @@ export function HeartWriting(props: Props) {
             .to(clocks, { hold: 1, duration: 1.4 }, nameAt + PHASE.writeName * 0.8)
             .to(clocks, { fade: 0.92, duration: 1.2 }, nameAt + PHASE.writeName)
             // The reserve pools below, then writes the question in the same hand.
-            .to(clocks, { gather: 1, duration: PHASE.gather, ease: 'power2.inOut' }, gatherAt)
-            .to(clocks, { curl: 0.8, duration: PHASE.gather, ease: 'sine.out' }, gatherAt)
+            .to(clocks, { gather: 1, duration: gatherFor, ease: 'power2.inOut' }, gatherAt)
+            .to(clocks, { curl: 0.8, duration: gatherFor, ease: 'sine.out' }, gatherAt)
             .to(
               clocks,
               { questionWrite: 1, duration: PHASE.writeQuestion, ease: 'none' },
@@ -530,7 +534,7 @@ export function HeartWriting(props: Props) {
             ? 'heart'
             : time < nameAt
               ? 'dissolve'
-              : time < gatherAt
+              : time < questionAt
                 ? 'name'
                 : 'question'
 
@@ -560,7 +564,6 @@ export function HeartWriting(props: Props) {
             clocks.yaw
 
           fadeUniforms.uFade.value = clocks.fade
-          fadeUniforms.uSky.value.copy(handoverSky).multiplyScalar(1 - clocks.sky)
           renderer.setRenderTarget(accumulation)
           renderer.render(fadeScene, fadeCamera)
           renderer.clearDepth()
@@ -593,6 +596,14 @@ export function HeartWriting(props: Props) {
         // wall clock drops and duplicates frames under load, an injected timestep does not.
         const capture = {
           duration: () => timeline.duration(),
+          // The moments worth photographing, named rather than guessed. Tests and the evidence
+          // script read these, so retiming a phase cannot leave them pointing at the wrong frame.
+          beats: () => ({
+            heart: dissolveAt - PHASE.hold * 0.5,
+            dissolve: dissolveAt + PHASE.dissolve * 0.5,
+            nameAlone: questionAt - 0.3,
+            bothLines: endAt,
+          }),
           seek: (seconds: number, step = 1 / 60) => {
             driven = true
             timeline.pause()
@@ -632,6 +643,7 @@ export function HeartWriting(props: Props) {
           bloom.setSize(width, height)
           accumulation.setSize(Math.round(width * pixelRatio), Math.round(height * pixelRatio))
           uniforms.uResolution.value.set(width, height)
+          fadeUniforms.uResolution.value.set(width, height)
           if (resizeTimer) clearTimeout(resizeTimer)
           resizeTimer = setTimeout(() => {
             layout = buildLayout(props, width, height)

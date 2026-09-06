@@ -179,7 +179,10 @@ export const HEART_VERTEX_SHADER = `
       ? depositing(aRole < 0.5 ? uNameWrite : uQuestionWrite, aWrite)
       : 0.0;
     vColor = mix(color, aInkColor, ink);
-    vEmit = mix(aEmit, aInk * uInkGain, ink) * twinkle;
+    // Reserve material goes dark while it pools, so the pause after the name is a held frame
+    // and not a field of drifting dust. It comes back as it lands into the question's strokes.
+    float pooling = step(0.5, aRole) * step(aRole, 1.5) * uGather;
+    vEmit = mix(aEmit * (1.0 - pooling * 0.9), aInk * uInkGain, ink) * twinkle;
     gl_PointSize = max(0.7, aSize * uPixelRatio * vStretch * (9.0 / -view.z));
     gl_Position = clip;
   }
@@ -205,13 +208,41 @@ export const HEART_FRAGMENT_SHADER = `
   }
 `
 
+/**
+ * The sky an empty frame decays towards: the galaxy scene's own background, rebuilt here rather
+ * than approximated, so the ending sits in the same universe the six came from instead of
+ * cutting to black. Mirrors the two gradients on `.scene-cosmos`.
+ */
 export const FADE_FRAGMENT_SHADER = `
   uniform float uFade;
-  uniform vec3 uSky;
+  uniform vec2 uResolution;
+
+  vec3 toLinear(vec3 c) {
+    return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c));
+  }
+
   void main() {
-    // What an empty frame decays towards. It starts as the sky the galaxy handed over and
-    // reaches true black by the time the heart is whole.
-    gl_FragColor = vec4(uSky, uFade);
+    vec2 uv = gl_FragCoord.xy / uResolution;
+    // Screen space runs bottom-up; the CSS gradient runs top-down.
+    float y = 1.0 - uv.y;
+
+    vec3 top = vec3(0.00784, 0.01569, 0.03529);   // #020409
+    vec3 mid = vec3(0.01961, 0.03529, 0.07059);   // #050912
+    vec3 bottom = vec3(0.00784, 0.01961, 0.03922); // #02050a
+    vec3 base = y < 0.62
+      ? mix(top, mid, y / 0.62)
+      : mix(mid, bottom, (y - 0.62) / 0.38);
+
+    // The nebula: an ellipse centred where the galaxy sat, faded out by a third of the frame.
+    vec2 offset = vec2(uv.x - 0.5, y - 0.58);
+    offset.x *= uResolution.x / max(1.0, uResolution.y);
+    float glow = 1.0 - smoothstep(0.0, 1.0, length(offset) / 0.34);
+    vec3 sky = mix(base, vec3(0.07843, 0.17255, 0.30980), glow * 0.23);
+
+    // The CSS gradient is composited straight to the screen; this one is tone mapped on the
+    // way out, and ACES has a toe that crushes values this dark. Measured against the galaxy
+    // scene's own pixels, the sky needs this much lift to land on the same colour.
+    gl_FragColor = vec4(toLinear(sky) * vec3(4.8, 3.1, 2.5), uFade);
   }
 `
 

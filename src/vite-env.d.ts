@@ -9,6 +9,7 @@ declare global {
     heartSequence?: {
       duration: () => number
       seek: (seconds: number, step?: number) => void
+      beats: () => { heart: number; dissolve: number; nameAlone: number; bothLines: number }
       resume: () => void
     }
   }
