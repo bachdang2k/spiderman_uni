@@ -1,7 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { reducedMotion } from '../lib/motion'
-import galaxyReferenceUrl from '../assets/references/Screenshot 2026-09-04 at 13.43.54.png'
+import { gaussian, random } from '../lib/noise'
+import { createLetterPoint } from '../lib/galaxyLetter'
+
+/** The six is slow on purpose: it is the last thing the viewer touches before the ending runs. */
+export const MORPH_SECONDS = 6.4
+import galaxyReferenceUrl from '../assets/references/galaxy-six-mask.png'
 
 type GalaxyPoint = {
   x: number
@@ -65,17 +70,6 @@ const FRAGMENT_SHADER = `
 const STAR_COLORS = ['#f7f1e3', '#dcecff', '#b9d9ff', '#ffffff', '#f2c889']
 const FLARE_STOPS = [0.25, 0.48, 0.68, 0.86, 0.97]
 
-function random(seed: number) {
-  const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453
-  return value - Math.floor(value)
-}
-
-function gaussian(seed: number) {
-  const a = Math.max(0.0001, random(seed))
-  const b = random(seed + 91.7)
-  return Math.sqrt(-2 * Math.log(a)) * Math.cos(Math.PI * 2 * b)
-}
-
 function spiralPoint(t: number, lane: number, seed: number): GalaxyPoint {
   const laneOffset = (lane - 2) * (0.055 + t * 0.038)
   const angle = 1.2 - t * Math.PI * 4.18 - laneOffset * 3.4
@@ -124,29 +118,6 @@ function createGalaxyPoint(index: number): GalaxyPoint {
   const withinSegment = Math.pow(random(seed * 19.7), 1.25) * 0.72
   const t = (segment + withinSegment + (lane % 3) * 0.11) / segmentCount
   return spiralPoint(t, lane, seed)
-}
-
-function createLetterPoint(index: number, count: number) {
-  const seed = index + 313
-  const onStem = index / count < 0.68
-  const along = onStem ? index / (count * 0.68) : (index - count * 0.68) / (count * 0.32)
-  const stream = Math.floor(random(seed * 4.1) * 9) - 4
-  const streamOffset = stream * 0.027
-  const dust = gaussian(seed * 9.8) * 0.052
-
-  if (onStem) {
-    return {
-      x: -1.15 + streamOffset + dust,
-      y: 2.05 - along * 4.05 + Math.sin(along * 41 + stream) * 0.025,
-      z: gaussian(seed * 11.7) * 0.2,
-    }
-  }
-
-  return {
-    x: -1.15 + along * 2.45 + Math.sin(along * 37 + stream) * 0.025,
-    y: -2 + streamOffset + dust,
-    z: gaussian(seed * 11.7) * 0.2,
-  }
 }
 
 function loadReferenceStars() {
@@ -423,7 +394,7 @@ export function GalaxyMorph({ morphed }: { morphed: boolean }) {
   useEffect(() => {
     const tween = gsap.to(progressRef.current, {
       value: morphed ? 1 : 0,
-      duration: reducedMotion() ? 0.01 : 3.8,
+      duration: reducedMotion() ? 0.01 : MORPH_SECONDS,
       ease: 'power2.inOut',
     })
     return () => {

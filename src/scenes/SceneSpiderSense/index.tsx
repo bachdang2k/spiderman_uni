@@ -28,7 +28,7 @@ export function SceneSpiderSense(props: SceneProps) {
       active={props.active}
       className="scene-sense"
     >
-      <SceneProgress index={1} total={8} />
+      <SceneProgress index={1} total={5} />
       <div className="sense-header">
         <p className="eyebrow" data-reveal>
           QUICK TEST

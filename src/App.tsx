@@ -12,23 +12,12 @@ import { SceneWeb } from './scenes/SceneWeb'
 import { SceneSpiderSense } from './scenes/SceneSpiderSense'
 import { SceneWonder } from './scenes/SceneWonder'
 import { SceneCosmos } from './scenes/SceneCosmos'
-import { SceneRain } from './scenes/SceneRain'
-import { SceneButterfly } from './scenes/SceneButterfly'
-import { SceneMystery } from './scenes/SceneMystery'
-import { SceneFinal } from './scenes/SceneFinal'
+import { SceneHeart } from './scenes/SceneHeart'
 import type { SceneProps } from './scenes/types'
 
 gsap.registerPlugin(ScrollTrigger)
-const scenes = [
-  SceneWeb,
-  SceneSpiderSense,
-  SceneWonder,
-  SceneCosmos,
-  SceneRain,
-  SceneButterfly,
-  SceneMystery,
-  SceneFinal,
-]
+const scenes = [SceneWeb, SceneSpiderSense, SceneWonder, SceneCosmos, SceneHeart]
+const LAST_SCENE = scenes.length - 1
 export default function App() {
   return <StoryExperience />
 }
@@ -62,7 +51,7 @@ function StoryExperience() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Home') lenisRef.current?.scrollTo(0)
-      if (e.key === 'End' && unlocked === 8) lenisRef.current?.scrollTo('#scene-final')
+      if (e.key === 'End' && unlocked > LAST_SCENE) lenisRef.current?.scrollTo('#scene-heart')
     }
     addEventListener('keydown', onKey)
     return () => removeEventListener('keydown', onKey)
@@ -82,27 +71,30 @@ function StoryExperience() {
   }, [current, unlocked])
   const advance = useCallback(
     (from: number) => {
-      if (from !== current || from >= 7) return
+      if (from !== current || from >= LAST_SCENE) return
       const reduce = reducedMotion()
-      setTransition(!reduce)
+      // The last handover carries the galaxy's L straight into the ending. A wipe there would
+      // cut the one thing that beat depends on, so it is the only transition without one.
+      const seamless = from === LAST_SCENE - 1
+      setTransition(!reduce && !seamless)
       setTimeout(
         () => {
           const next = from + 1
           setUnlocked((v) => Math.max(v, next + 1))
           setCurrent(next)
-          setTimeout(() => setTransition(false), reduce ? 10 : 850)
+          if (!seamless) setTimeout(() => setTransition(false), reduce ? 10 : 850)
         },
-        reduce ? 10 : 420,
+        reduce || seamless ? 10 : 420,
       )
     },
     [current],
   )
   return (
-    <main>
+    <main className={current === LAST_SCENE ? 'is-ending' : ''}>
       <a href="#scene-web" className="skip-link">
         Back to the beginning
       </a>
-      <SoundToggle enabled={sound.enabled} toggle={sound.toggle} />
+      {current < LAST_SCENE ? <SoundToggle enabled={sound.enabled} toggle={sound.toggle} /> : null}
       <CustomCursor />
       <CinematicTransition visible={transition} />
       {scenes.slice(0, unlocked).map((Scene, index) => {

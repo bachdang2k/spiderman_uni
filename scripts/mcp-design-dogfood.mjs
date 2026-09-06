@@ -71,26 +71,34 @@ async function runStory(prefix) {
   await click('.heroine-button', 1.8)
   await screenshot(`${prefix}-02-wonder.png`)
   await click('.scene-wonder .continue', 2.4)
-  await click('.galaxy-button', 2.8)
-  await screenshot(`${prefix}-03-cosmos.png`)
-  await click('.scene-cosmos .continue', 2.4)
-  await click('.rain-button', 2.2)
-  await screenshot(`${prefix}-04-rain.png`)
-  await click('.scene-rain .continue', 2.4)
-  await screenshot(`${prefix}-05a-sakura-drift.png`)
-  await wait(3.2)
-  await screenshot(`${prefix}-05b-sakura-converge.png`)
-  await wait(5)
-  await screenshot(`${prefix}-05c-sakura-name.png`)
-  await click('.scene-butterfly .continue', 2.4)
-  await click('.mystery-button', 1.8)
-  await screenshot(`${prefix}-06-mystery.png`)
-  await click('.scene-mystery .continue', 3.2)
-  await screenshot(`${prefix}-07-final.png`)
+  await screenshot(`${prefix}-03-cosmos-six.png`)
+  // Touching the six is the last interaction; everything after it runs on by itself.
+  await click('.galaxy-button', 8.4)
+  await screenshot(`${prefix}-04-heart-inherited-l.png`)
+  await call('browser_evaluate', {
+    function: `async () => {
+      const until = Date.now() + 40000
+      while (!('heartSequence' in window) && Date.now() < until) {
+        await new Promise((resolve) => setTimeout(resolve, 150))
+      }
+      return 'heartSequence' in window
+    }`,
+  })
+  for (const [name, at] of Object.entries({
+    '05-heart-hold': 4.8,
+    '06-mid-dissolve': 7.8,
+    '07-name-alone': 18.6,
+    '08-both-lines': 26.8,
+  })) {
+    await call('browser_evaluate', {
+      function: `() => window.heartSequence.seek(${at})`,
+    })
+    await screenshot(`${prefix}-${name}.png`)
+  }
 
   return call('browser_evaluate', {
     function: `() => {
-      const selectors = ['.is-active .progress', '.sound-toggle', '.sunset-answer', '.star-invitation h1', '.invite-hero']
+      const selectors = ['.scene-heart .heart-writing', '.scene-heart .sr-only', '.scene-heart button']
       const styles = selectors.map(selector => {
         const element = document.querySelector(selector)
         if (!element) return { selector, missing: true }

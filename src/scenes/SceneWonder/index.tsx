@@ -24,7 +24,7 @@ export function SceneWonder(props: SceneProps) {
       {...props}
       className={`scene-wonder ${awakened ? 'portal-open' : ''}`}
     >
-      <SceneProgress index={2} total={8} />
+      <SceneProgress index={2} total={5} />
       <ComicHalftone opacity={0.11} />
       <p className="wonder-label" data-reveal>
         WONDER // WOMAN

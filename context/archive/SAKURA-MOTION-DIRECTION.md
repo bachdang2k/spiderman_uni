@@ -1,3 +1,8 @@
+> **ARCHIVED 2026-09-05.** The cherry-blossom half of the story was removed and replaced by
+> `HEART-PARTICLE-DIRECTION.md` — one scene, three beats, one timeline. Kept because its
+> choreography-by-phase method and its acceptance-frame discipline are still the house
+> standard; the petals themselves are gone.
+
 # SAKURA MOTION DIRECTION — LINH CHU REVEAL
 
 ## Intent

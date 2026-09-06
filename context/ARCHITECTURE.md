@@ -7,7 +7,7 @@ story config ───────► scene state machine ───────�
                            │                            │
                            ├── Lenis/GSAP               ├── SVG/CSS
                            ├── Howler                    ├── Canvas rAF
-                           └── Three.js galaxy/sakura    └── semantic copy fallback
+                           └── Three.js galaxy + heart   └── semantic copy fallback
 ```
 
 ## Ranh giới
@@ -27,11 +27,13 @@ Mỗi scene: `locked → active → resolved → exited`. Scene chỉ được m
 1. Chạm web và bắn tơ.
 2. Chọn tín hiệu Spider Sense khác biệt.
 3. Chạm huy hiệu của nữ anh hùng nguyên bản để mở cổng sao.
-4. Chạm galaxy hình 6 để các điểm 3D hội tụ thành chữ L.
-5. Chạm giọt mưa để đánh thức cành anh đào.
-6. Sau va chạm, cánh hoa tự hội tụ thành `LINH CHU`; đàn bướm dẫn mắt tới CTA xuất hiện muộn.
-7. Mở kén sao được quấn bằng tơ nhện.
-8. Các vì sao ráp thành lời mời đi ngắm hoàng hôn.
+4. Chạm galaxy hình `6` — **tương tác cuối cùng của cả câu chuyện**. Các điểm 3D hội tụ chậm
+   thành chữ `L`, rồi tự chuyển sang cảnh cuối, không có nút và không có wipe.
+5. `The Heart That Writes` — một cảnh, ba beat, một timeline GSAP, không có tương tác nào:
+   trái tim hạt sáng đứng yên rồi tan rã từ nửa dưới lên · chính những hạt đó viết `Diệu Linh`
+   theo lối viết tay · phần hạt dự trữ gom xuống và viết câu hỏi bằng cùng nét tay. Rồi dừng.
+
+Truyện kết thúc ở khung đó: không nút trả lời, không hoàng hôn, không chrome, không fade.
 
 ## Fallback
 

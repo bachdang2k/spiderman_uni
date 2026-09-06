@@ -46,7 +46,7 @@ export function SceneWeb(props: SceneProps) {
       active={props.active}
       className={`scene-web ${done ? 'web-fired' : ''}`}
     >
-      <SceneProgress index={0} total={8} />
+      <SceneProgress index={0} total={5} />
       <ComicHalftone opacity={0.13} />
       <WebCanvas burst={done} target={shot} />
       <div className="web-motion-lines" aria-hidden="true">

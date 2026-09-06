@@ -32,4 +32,5 @@ Toàn bộ nội dung cá nhân nằm trong `src/config/story.ts`:
 - `assets`: chỗ khai báo asset thay thế nếu muốn bổ sung.
 
 Visual chính hiện được tạo bằng Canvas, SVG và CSS nên không phụ thuộc ảnh stock.
+
 # spiderman_uni
